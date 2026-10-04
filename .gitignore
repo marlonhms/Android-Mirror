@@ -1,0 +1,11 @@
+# Local runtime settings and cache
+*.log
+last_ip.txt
+launchscrcpy.txt
+aura_settings.ini
+*.lnk
+gravacao_*.mp4
+
+# Test artifacts
+test_*.cs
+test_*.exe
