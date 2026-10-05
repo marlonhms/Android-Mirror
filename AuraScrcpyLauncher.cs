@@ -47,6 +47,11 @@ namespace AuraScrcpy
         private static TextBlock txtToggleVisibilityIcon;
         private static TextBlock txtToggleVisibilityText;
 
+        private static Process audioCompanionProcess = null;
+        private static Button btnAudioCompanion;
+        private static TextBlock txtAudioCompanionIcon;
+        private static TextBlock txtAudioCompanionText;
+
         private static Window mainWindow;
         private static string baseDir;
         private static string adbPath;
@@ -646,13 +651,14 @@ namespace AuraScrcpy
                     <!-- Ações Principais -->
                     <Grid Margin='0,2,0,2'>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width='2*'/>
+                            <ColumnDefinition Width='2.2*'/>
+                            <ColumnDefinition Width='1*'/>
                             <ColumnDefinition Width='1*'/>
                             <ColumnDefinition Width='1*'/>
                             <ColumnDefinition Width='1*'/>
                         </Grid.ColumnDefinitions>
 
-                        <Button Name='BtnLaunch' Grid.Column='0' Height='46' Margin='0,0,4,0' Cursor='Hand' BorderThickness='0'>
+                        <Button Name='BtnLaunch' Grid.Column='0' Height='46' Margin='0,0,3,0' Cursor='Hand' BorderThickness='0'>
                             <Button.Background>
                                 <LinearGradientBrush StartPoint='0,0' EndPoint='1,1'>
                                     <GradientStop Color='#10B981' Offset='0.0'/>
@@ -661,7 +667,7 @@ namespace AuraScrcpy
                             </Button.Background>
                             <StackPanel Orientation='Horizontal'>
                                 <TextBlock Text='🚀' FontSize='18' Margin='0,0,8,0' VerticalAlignment='Center'/>
-                                <TextBlock Text='INICIAR ESPELHAMENTO' FontSize='14' FontWeight='Bold' Foreground='White' VerticalAlignment='Center'/>
+                                <TextBlock Text='INICIAR ESPELHAMENTO' FontSize='13.5' FontWeight='Bold' Foreground='White' VerticalAlignment='Center'/>
                             </StackPanel>
                         </Button>
 
@@ -672,17 +678,24 @@ namespace AuraScrcpy
                             </StackPanel>
                         </Button>
 
-                        <Button Name='BtnStop' Grid.Column='2' Height='46' Margin='2,0,2,0' Background='#1E293B' BorderBrush='#EF4444' BorderThickness='1' Cursor='Hand'>
+                        <Button Name='BtnAudioCompanion' Grid.Column='2' Height='46' Margin='2,0,2,0' Background='#1E293B' BorderBrush='#06B6D4' BorderThickness='1' Cursor='Hand' ToolTip='Inicia ou desliga apenas o áudio do celular em segundo plano sem precisar reiniciar o espelhamento de vídeo.'>
                             <StackPanel HorizontalAlignment='Center'>
-                                <TextBlock Text='⏹️ Encerrar' FontWeight='SemiBold' FontSize='12' Foreground='#F87171'/>
-                                <TextBlock Text='Parar Processos' FontSize='9' Foreground='#94A3B8'/>
+                                <TextBlock Name='TxtAudioCompanionIcon' Text='🎧' FontWeight='SemiBold' FontSize='12' Foreground='#67E8F9' HorizontalAlignment='Center'/>
+                                <TextBlock Name='TxtAudioCompanionText' Text='Áudio Solo' FontSize='9' Foreground='#94A3B8' HorizontalAlignment='Center'/>
                             </StackPanel>
                         </Button>
 
-                        <Button Name='BtnToggleVisibility' Grid.Column='3' Height='46' Margin='4,0,0,0' Background='#1E293B' BorderBrush='#8B5CF6' BorderThickness='1' Cursor='Hand'>
+                        <Button Name='BtnToggleVisibility' Grid.Column='3' Height='46' Margin='2,0,2,0' Background='#1E293B' BorderBrush='#8B5CF6' BorderThickness='1' Cursor='Hand' ToolTip='Move a janela do espelhamento para fora da tela (mantendo captura 60 FPS ativa para OBS/Broadcast) ou restaura para a tela.'>
                             <StackPanel HorizontalAlignment='Center'>
                                 <TextBlock Name='TxtToggleVisibilityIcon' Text='👻' FontWeight='SemiBold' FontSize='12' Foreground='#C4B5FD' HorizontalAlignment='Center'/>
                                 <TextBlock Name='TxtToggleVisibilityText' Text='Ocultar' FontSize='9' Foreground='#94A3B8' HorizontalAlignment='Center'/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Name='BtnStop' Grid.Column='4' Height='46' Margin='3,0,0,0' Background='#1E293B' BorderBrush='#EF4444' BorderThickness='1' Cursor='Hand' ToolTip='Encerra todos os processos em execução do SCRCPY (vídeo e áudio).'>
+                            <StackPanel HorizontalAlignment='Center'>
+                                <TextBlock Text='⏹️ Encerrar' FontWeight='SemiBold' FontSize='12' Foreground='#F87171'/>
+                                <TextBlock Text='Parar Processos' FontSize='9' Foreground='#94A3B8'/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -784,6 +797,11 @@ namespace AuraScrcpy
             btnToggleVisibility = (Button)mainWindow.FindName("BtnToggleVisibility");
             txtToggleVisibilityIcon = (TextBlock)mainWindow.FindName("TxtToggleVisibilityIcon");
             txtToggleVisibilityText = (TextBlock)mainWindow.FindName("TxtToggleVisibilityText");
+
+            btnAudioCompanion = (Button)mainWindow.FindName("BtnAudioCompanion");
+            txtAudioCompanionIcon = (TextBlock)mainWindow.FindName("TxtAudioCompanionIcon");
+            txtAudioCompanionText = (TextBlock)mainWindow.FindName("TxtAudioCompanionText");
+
             txtStatus = (TextBlock)mainWindow.FindName("TxtStatus");
             txtCmdPreview = (TextBox)mainWindow.FindName("TxtCmdPreview");
 
@@ -872,10 +890,18 @@ namespace AuraScrcpy
             };
             btnStop.Click += delegate { StopScrcpy(); };
             btnToggleVisibility.Click += delegate { ToggleScrcpyVisibility(); };
+            btnAudioCompanion.Click += delegate { ToggleAudioCompanion(); };
 
             mainWindow.Closed += delegate {
                 SaveSettings();
                 if (autoDetectTimer != null) autoDetectTimer.Stop();
+                try {
+                    if (audioCompanionProcess != null)
+                    {
+                        try { audioCompanionProcess.Kill(); } catch { }
+                        audioCompanionProcess = null;
+                    }
+                } catch { }
                 try {
                     if (chkNoVirtualKeyboard != null && chkNoVirtualKeyboard.IsChecked == true)
                     {
@@ -2419,6 +2445,14 @@ namespace AuraScrcpy
                     SafeInvoke(delegate {
                         args = BuildArgumentsForTarget(selector, isUsb);
                         hideVirtualKeyboard = chkNoVirtualKeyboard.IsChecked == true && chkCamera.IsChecked != true;
+                        if (chkAudio.IsChecked == true && audioCompanionProcess != null && !audioCompanionProcess.HasExited)
+                        {
+                            try { audioCompanionProcess.Kill(); } catch { }
+                            audioCompanionProcess = null;
+                            if (txtAudioCompanionIcon != null) txtAudioCompanionIcon.Text = "🎧";
+                            if (txtAudioCompanionText != null) txtAudioCompanionText.Text = "Áudio Solo";
+                            if (btnAudioCompanion != null) btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(6, 182, 212));
+                        }
                     });
 
                     // Wake device up & keep stay awake
@@ -2553,6 +2587,17 @@ namespace AuraScrcpy
                     txtStatus.Text = "Nenhum processo do SCRCPY estava em execução.";
                 }
 
+                if (audioCompanionProcess != null)
+                {
+                    try { audioCompanionProcess.Kill(); } catch { }
+                    audioCompanionProcess = null;
+                }
+                SafeInvoke(delegate {
+                    if (txtAudioCompanionIcon != null) txtAudioCompanionIcon.Text = "🎧";
+                    if (txtAudioCompanionText != null) txtAudioCompanionText.Text = "Áudio Solo";
+                    if (btnAudioCompanion != null) btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(6, 182, 212));
+                });
+
                 bool hideVirtualKeyboard = false;
                 SafeInvoke(delegate {
                     if (chkNoVirtualKeyboard != null) hideVirtualKeyboard = chkNoVirtualKeyboard.IsChecked == true;
@@ -2567,6 +2612,116 @@ namespace AuraScrcpy
             catch (Exception ex)
             {
                 txtStatus.Text = "Erro ao encerrar: " + ex.Message;
+            }
+        }
+
+        private static void ToggleAudioCompanion()
+        {
+            try
+            {
+                if (audioCompanionProcess != null && !audioCompanionProcess.HasExited)
+                {
+                    try { audioCompanionProcess.Kill(); } catch { }
+                    audioCompanionProcess = null;
+                    txtAudioCompanionIcon.Text = "🎧";
+                    txtAudioCompanionText.Text = "Áudio Solo";
+                    btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(6, 182, 212));
+                    txtStatus.Text = "🔇 Transmissão de áudio em background encerrada.";
+                    return;
+                }
+
+                bool isUsb = rbUsb.IsChecked == true;
+                string targetIp = txtIp.Text.Trim();
+
+                if (!isUsb && string.IsNullOrEmpty(targetIp))
+                {
+                    MessageBox.Show("Por favor, digite o IP do celular na aba Wi-Fi para conectar o áudio.", "IP Vazio", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                txtStatus.Text = "Iniciando áudio do celular em segundo plano...";
+                btnAudioCompanion.IsEnabled = false;
+
+                ThreadPool.QueueUserWorkItem(delegate {
+                    try
+                    {
+                        string exactSerial = null;
+                        if (isUsb)
+                        {
+                            exactSerial = !string.IsNullOrEmpty(lastDetectedUsbDevice) ? lastDetectedUsbDevice : null;
+                        }
+                        else
+                        {
+                            exactSerial = targetIp.Contains(":") ? targetIp : targetIp + ":5555";
+                        }
+
+                        string selector = exactSerial != null ? "-s " + exactSerial : (isUsb ? "-d" : "");
+                        string audioArgs = (string.IsNullOrEmpty(selector) ? "" : selector + " ") + "--no-window --audio-codec=opus --audio-buffer=50";
+
+                        ProcessStartInfo psi = new ProcessStartInfo();
+                        psi.FileName = scrcpyPath;
+                        psi.Arguments = audioArgs;
+                        psi.WorkingDirectory = baseDir;
+                        psi.UseShellExecute = false;
+                        psi.CreateNoWindow = true;
+                        psi.RedirectStandardError = true;
+
+                        Process proc = Process.Start(psi);
+                        audioCompanionProcess = proc;
+
+                        proc.EnableRaisingEvents = true;
+                        proc.Exited += delegate {
+                            SafeInvoke(delegate {
+                                if (audioCompanionProcess == proc)
+                                {
+                                    audioCompanionProcess = null;
+                                    txtAudioCompanionIcon.Text = "🎧";
+                                    txtAudioCompanionText.Text = "Áudio Solo";
+                                    btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(6, 182, 212));
+                                    txtStatus.Text = "Áudio em background finalizado.";
+                                }
+                            });
+                        };
+
+                        bool exited = proc.WaitForExit(1200);
+                        if (exited && proc.ExitCode != 0)
+                        {
+                            SafeInvoke(delegate {
+                                audioCompanionProcess = null;
+                                txtAudioCompanionIcon.Text = "🎧";
+                                txtAudioCompanionText.Text = "Áudio Solo";
+                                btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(6, 182, 212));
+                                txtStatus.Text = "❌ Falha ao iniciar áudio em background.";
+                                MessageBox.Show("Não foi possível iniciar o áudio em segundo plano.\n\nVerifique se o aparelho suporta captura de áudio (Android 11+) e se a conexão ADB está ativa.", "Alerta de Áudio", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            });
+                        }
+                        else
+                        {
+                            SafeInvoke(delegate {
+                                txtStatus.Text = "🔊 Áudio do celular transmitindo para o PC em segundo plano!";
+                                txtAudioCompanionIcon.Text = "🔊";
+                                txtAudioCompanionText.Text = "Parar Áudio";
+                                btnAudioCompanion.BorderBrush = new SolidColorBrush(Color.FromRgb(245, 158, 11)); // Amber
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        SafeInvoke(delegate {
+                            txtStatus.Text = "Erro ao iniciar áudio: " + ex.Message;
+                        });
+                    }
+                    finally
+                    {
+                        SafeInvoke(delegate {
+                            btnAudioCompanion.IsEnabled = true;
+                        });
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                txtStatus.Text = "Erro no áudio: " + ex.Message;
             }
         }
 

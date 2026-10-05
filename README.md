@@ -49,7 +49,14 @@ Projetado especialmente para **criadores de conteúdo, streamers e profissionais
   * **Configuração Simplificada:** Use o atalho **`Alt + K`** a qualquer momento para ajustar o layout do teclado físico diretamente no Android (ex: ABNT2 ou US Internacional).
   * **Restauração Automática:** Ao encerrar o espelhamento, as configurações originais do teclado são restauradas no dispositivo.
 
-### ⚡ 4. Perfis Rápidos de Desempenho
+### 🎧 4. Áudio Solo em Segundo Plano (Transmissão Paralela sem Reiniciar)
+* **O Problema Tradicional:** Se uma transmissão de vídeo já começou sem som, o SCRCPY não permite ligar o áudio na mesma janela sem fechar e reiniciar todo o espelhamento.
+* **A Solução Aura:** O botão dinâmico **`🎧 Áudio Solo`** inicia uma instância paralela invisível (`--no-window --audio-codec=opus`):
+  * **Zero Interrupção:** A janela de vídeo atual continua aberta normalmente a 60 FPS sem precisar ser reiniciada.
+  * **Som de Baixa Latência:** O áudio do Android passa a tocar instantaneamente no PC em alta fidelidade.
+  * **Controle Dinâmico:** Um clique no botão alterna entre iniciar e encerrar a recepção de áudio a qualquer momento.
+
+### ⚡ 5. Perfis Rápidos de Desempenho
 Alterne instantaneamente entre configurações pré-calibradas:
 
 | Perfil | FPS | Bitrate | Resolução | Buffer | Áudio | Foco |
@@ -61,7 +68,7 @@ Alterne instantaneamente entre configurações pré-calibradas:
 | **🔋 Wi-Fi Econômico** | 60 | 6M | 720p | 80 ms | Mudo | Conexões instáveis e economia de largura de banda |
 | **🎥 Webcam Pro** | 60 | 24M | 1080p | 80 ms | Mudo | Otimizado para OBS, Zoom e NVIDIA Broadcast |
 
-### 📶 5. Conectividade Inteligente & Detecção Wi-Fi
+### 📶 6. Conectividade Inteligente & Detecção Wi-Fi
 * **Varredura mDNS Automática:** Detecta as portas dinâmicas sorteadas pela Depuração por Wi-Fi do **Android 11, 12, 13, 14, 15 e 16** e conecta com 1 clique no botão `🔍 Auto-Detectar`.
 * **Fixação de Porta 5555:** Abra a porta clássica 5555 direto pela conexão de rede ou pelo cabo.
 * **Teste de Latência (Ping):** Medidor ICMP integrado com diagnóstico visual por cores (Verde: < 20ms, Amarelo: 20-45ms, Vermelho: > 45ms).

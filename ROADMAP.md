@@ -106,6 +106,10 @@ Todas as principais ferramentas do SCRCPY 4.1 estão expostas por toggles e sele
 - **O que faz:** Simula um teclado físico de hardware conectado ao Android (`--keyboard=uhid`) e suprime automaticamente a abertura do teclado na tela via ADB (`settings put secure show_ime_with_hard_keyboard 0`).
 - **Benefício:** Elimina a abertura do Gboard/SwiftKey ao focar campos de texto, impedindo o encurtamento da área de visão do celular e permitindo digitação contínua e limpa pelo PC.
 
+### 11. 🎧 Áudio Solo em Background (`--no-window --audio-codec=opus`)
+- **O que faz:** Inicia uma instância secundária invisível dedicada ao áudio, transmitindo o som do celular com baixa latência pelo codec Opus.
+- **Benefício:** Permite ligar ou desligar o áudio do celular no PC a qualquer momento com 1 clique, sem precisar interromper o espelhamento de vídeo já aberto.
+
 ---
 
 ## 5. Guia Integrado de Atalhos do SCRCPY
