@@ -99,8 +99,12 @@ Todas as principais ferramentas do SCRCPY 4.1 estão expostas por toggles e sele
 ### 8. 📷 Modo Câmera / Webcam de Estúdio (`--video-source=camera`)
 - **O que faz:** Utiliza os sensores ópticos físicos do celular como uma webcam de estúdio profissional para Discord, Teams, Zoom e OBS, com seletor direto de **Câmera Traseira** ou **Câmera Frontal**. Requer Android 12+.
 
-### 9. ⌨️ Modo OTG (`--otg`)
+### 9. 🖱️ Modo OTG (`--otg`)
 - **O que faz:** Simula teclado e mouse USB conectados fisicamente ao aparelho via hardware, sem transmitir vídeo. Protegido na interface: desabilita automaticamente no modo Wi-Fi para evitar travamentos de conexão.
+
+### 10. ⌨️ Ocultar Teclado Virtual (Modo UHID / Teclado Físico)
+- **O que faz:** Simula um teclado físico de hardware conectado ao Android (`--keyboard=uhid`) e suprime automaticamente a abertura do teclado na tela via ADB (`settings put secure show_ime_with_hard_keyboard 0`).
+- **Benefício:** Elimina a abertura do Gboard/SwiftKey ao focar campos de texto, impedindo o encurtamento da área de visão do celular e permitindo digitação contínua e limpa pelo PC.
 
 ---
 
@@ -112,6 +116,7 @@ A interface inclui um guia expansível com os atalhos de teclado mais úteis do 
 | :--- | :--- |
 | **`Alt + P`** | Liga / Desliga a tela do celular (Power) |
 | **`Alt + O`** | Apaga a tela física mantendo o espelhamento ativo no PC |
+| **`Alt + K`** | Abre configurações de layout do teclado físico no Android |
 | **`Alt + F` ou `F11`** | Alterna entre Modo Janela e Tela Cheia |
 | **`Alt + H`** | Pressiona o botão Home (Início) |
 | **`Alt + B` ou Botão Direito** | Pressiona o botão Voltar (Back) |

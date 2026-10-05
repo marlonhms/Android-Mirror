@@ -93,6 +93,7 @@ namespace AuraScrcpy
         private static CheckBox chkOtg;
         private static CheckBox chkCloseOnLaunch;
         private static CheckBox chkInvisibleMode;
+        private static CheckBox chkNoVirtualKeyboard;
 
         // UI Controls - Advanced Tuning
         private static ComboBox cmbResolution;
@@ -481,6 +482,7 @@ namespace AuraScrcpy
                                 <StackPanel Grid.Column='0' Margin='0,0,6,0'>
                                     <CheckBox Name='ChkScreenOff' Content='📱 Desligar tela do celular (-S)' IsChecked='True' ToolTip='Desliga a tela física do aparelho enquanto espelha, poupando muita bateria e calor.'/>
                                     <CheckBox Name='ChkStayAwake' Content='☕ Manter aparelho acordado (-w)' IsChecked='True' ToolTip='Impede o celular de entrar em modo de suspensão durante a transmissão.'/>
+                                    <CheckBox Name='ChkNoVirtualKeyboard' Content='⌨️ Ocultar Teclado Virtual (UHID)' IsChecked='True' ToolTip='Simula teclado físico de hardware (UHID) e suprime o teclado virtual (Gboard/SwiftKey) na tela do celular ao focar campos de texto, preservando 100% da visualização. Digite com o teclado físico do seu PC.'/>
                                     <CheckBox Name='ChkAudio' Content='🔊 Transmitir Áudio (Opus)' IsChecked='False' ToolTip='Encaminha o áudio do Android para o PC usando Opus de baixa latência (requer Android 11+).'/>
                                     <CheckBox Name='ChkAlwaysOnTop' Content='📌 Janela sempre no topo' IsChecked='False' ToolTip='Mantém a janela do espelhamento visível sobre todos os outros programas.'/>
                                     <CheckBox Name='ChkBorderless' Content='🔲 Janela sem bordas' IsChecked='False' ToolTip='Remove as molduras da janela para uma experiência moderna e imersiva.'/>
@@ -490,7 +492,7 @@ namespace AuraScrcpy
                                     <CheckBox Name='ChkShowTouches' Content='👆 Exibir toques na tela (-t)' IsChecked='False' ToolTip='Mostra círculos visuais nos toques físicos na tela (ótimo para tutoriais e apresentações).'/>
                                     <CheckBox Name='ChkRecord' Content='🔴 Gravar sessão em MP4' IsChecked='False' ToolTip='Grava a transmissão diretamente em um arquivo MP4 com data e hora na pasta local.'/>
                                     <CheckBox Name='ChkCamera' Content='📷 Modo Câmera / Webcam' IsChecked='False' ToolTip='Usa a câmera física do celular como webcam de estúdio de alta resolução (requer Android 12+).'/>
-                                    <CheckBox Name='ChkOtg' Content='⌨️ Modo OTG (Teclado/Mouse)' IsChecked='False' ToolTip='Controla o celular com mouse e teclado sem espelhar tela (apenas via USB).'/>
+                                    <CheckBox Name='ChkOtg' Content='🖱️ Modo OTG (Teclado/Mouse)' IsChecked='False' ToolTip='Controla o celular com mouse e teclado sem espelhar tela (apenas via USB).'/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -615,6 +617,7 @@ namespace AuraScrcpy
                             <UniformGrid Columns='2'>
                                 <TextBlock Text='• Alt + P : Ligar / Desligar tela' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + O : Apagar tela física (mantém PC)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
+                                <TextBlock Text='• Alt + K : Configurar layout teclado físico' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + F / F11 : Alternar Tela Cheia' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + H : Botão Home (Início)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + B / Botão Dir : Botão Voltar' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
@@ -765,6 +768,7 @@ namespace AuraScrcpy
             chkOtg = (CheckBox)mainWindow.FindName("ChkOtg");
             chkCloseOnLaunch = (CheckBox)mainWindow.FindName("ChkCloseOnLaunch");
             chkInvisibleMode = (CheckBox)mainWindow.FindName("ChkInvisibleMode");
+            chkNoVirtualKeyboard = (CheckBox)mainWindow.FindName("ChkNoVirtualKeyboard");
 
             cmbResolution = (ComboBox)mainWindow.FindName("CmbResolution");
             cmbFps = (ComboBox)mainWindow.FindName("CmbFps");
@@ -840,6 +844,7 @@ namespace AuraScrcpy
             chkCamera.Click += tweakHandler;
             chkOtg.Click += tweakHandler;
             chkInvisibleMode.Click += tweakHandler;
+            chkNoVirtualKeyboard.Click += tweakHandler;
             chkCloseOnLaunch.Click += delegate { SaveSettings(); };
 
             SelectionChangedEventHandler comboHandler = delegate {
@@ -871,6 +876,12 @@ namespace AuraScrcpy
             mainWindow.Closed += delegate {
                 SaveSettings();
                 if (autoDetectTimer != null) autoDetectTimer.Stop();
+                try {
+                    if (chkNoVirtualKeyboard != null && chkNoVirtualKeyboard.IsChecked == true)
+                    {
+                        RunCommand(adbPath, "shell settings put secure show_ime_with_hard_keyboard 1", 1500);
+                    }
+                } catch { }
             };
         }
 
@@ -932,6 +943,7 @@ namespace AuraScrcpy
                     chkShowTouches.IsChecked = false;
                     chkCamera.IsChecked = false;
                     chkOtg.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
 
                 case "Gaming":
@@ -952,6 +964,7 @@ namespace AuraScrcpy
                     chkShowTouches.IsChecked = false;
                     chkCamera.IsChecked = false;
                     chkOtg.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
 
                 case "Balanced":
@@ -972,6 +985,7 @@ namespace AuraScrcpy
                     chkShowTouches.IsChecked = false;
                     chkCamera.IsChecked = false;
                     chkOtg.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
 
                 case "2K":
@@ -992,6 +1006,7 @@ namespace AuraScrcpy
                     chkShowTouches.IsChecked = true; // Mostra toques para apresentação
                     chkCamera.IsChecked = false;
                     chkOtg.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
 
                 case "Eco":
@@ -1012,6 +1027,7 @@ namespace AuraScrcpy
                     chkShowTouches.IsChecked = false;
                     chkCamera.IsChecked = false;
                     chkOtg.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
 
                 case "WebcamPro":
@@ -1037,6 +1053,7 @@ namespace AuraScrcpy
                     chkOtg.IsChecked = false;
                     chkBorderless.IsChecked = true;
                     chkInvisibleMode.IsChecked = false;
+                    chkNoVirtualKeyboard.IsChecked = true;
                     break;
             }
 
@@ -1108,6 +1125,7 @@ namespace AuraScrcpy
 
             if (chkScreenOff.IsChecked == true && chkCamera.IsChecked != true) sb.Append("-S ");
             if (chkStayAwake.IsChecked == true) sb.Append("-w ");
+            if (chkNoVirtualKeyboard.IsChecked == true && chkCamera.IsChecked != true) sb.Append("--keyboard=uhid ");
             if (chkAlwaysOnTop.IsChecked == true) sb.Append("--always-on-top ");
             if (chkBorderless.IsChecked == true) sb.Append("--window-borderless ");
             if (chkFullscreen.IsChecked == true) sb.Append("-f ");
@@ -2397,14 +2415,21 @@ namespace AuraScrcpy
 
                     string selector = exactSerial != null ? "-s " + exactSerial : (isUsb ? "-d" : "-s " + targetIp);
                     string args = "";
+                    bool hideVirtualKeyboard = false;
                     SafeInvoke(delegate {
                         args = BuildArgumentsForTarget(selector, isUsb);
+                        hideVirtualKeyboard = chkNoVirtualKeyboard.IsChecked == true && chkCamera.IsChecked != true;
                     });
 
                     // Wake device up & keep stay awake
                     RunCommand(adbPath, selector + " shell input keyevent 224", 2000);
                     RunCommand(adbPath, selector + " shell wm dismiss-keyguard", 2000);
                     RunCommand(adbPath, selector + " shell svc power stayon true", 2000);
+
+                    if (hideVirtualKeyboard)
+                    {
+                        RunCommand(adbPath, selector + " shell settings put secure show_ime_with_hard_keyboard 0", 2000);
+                    }
 
                     try
                     {
@@ -2418,6 +2443,14 @@ namespace AuraScrcpy
 
                         Process proc = Process.Start(psi);
                         currentScrcpyProcess = proc;
+
+                        proc.EnableRaisingEvents = true;
+                        proc.Exited += delegate {
+                            if (hideVirtualKeyboard && !string.IsNullOrEmpty(selector))
+                            {
+                                try { RunCommand(adbPath, selector + " shell settings put secure show_ime_with_hard_keyboard 1", 2000); } catch { }
+                            }
+                        };
                         
                         // Update UI toggle button to match initial state
                         SafeInvoke(delegate {
@@ -2518,6 +2551,17 @@ namespace AuraScrcpy
                 else
                 {
                     txtStatus.Text = "Nenhum processo do SCRCPY estava em execução.";
+                }
+
+                bool hideVirtualKeyboard = false;
+                SafeInvoke(delegate {
+                    if (chkNoVirtualKeyboard != null) hideVirtualKeyboard = chkNoVirtualKeyboard.IsChecked == true;
+                });
+                if (hideVirtualKeyboard)
+                {
+                    ThreadPool.QueueUserWorkItem(delegate {
+                        try { RunCommand(adbPath, "shell settings put secure show_ime_with_hard_keyboard 1", 2000); } catch { }
+                    });
                 }
             }
             catch (Exception ex)
@@ -2648,6 +2692,7 @@ namespace AuraScrcpy
                             if (k == "Otg") chkOtg.IsChecked = (v == "1");
                             if (k == "CloseOnLaunch") chkCloseOnLaunch.IsChecked = (v == "1");
                             if (k == "InvisibleMode") chkInvisibleMode.IsChecked = (v == "1");
+                            if (k == "NoVirtualKeyboard") chkNoVirtualKeyboard.IsChecked = (v == "1");
                         }
                     }
 
@@ -2703,6 +2748,7 @@ namespace AuraScrcpy
                 sb.AppendLine("Otg=" + (chkOtg.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("CloseOnLaunch=" + (chkCloseOnLaunch.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("InvisibleMode=" + (chkInvisibleMode.IsChecked == true ? "1" : "0"));
+                sb.AppendLine("NoVirtualKeyboard=" + (chkNoVirtualKeyboard.IsChecked == true ? "1" : "0"));
 
                 File.WriteAllText(configFile, sb.ToString());
             }

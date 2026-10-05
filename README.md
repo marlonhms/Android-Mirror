@@ -42,7 +42,14 @@ Projetado especialmente para **criadores de conteúdo, streamers e profissionais
   * O Windows **continua renderizando a 60 FPS**, mantendo o OBS e o NVIDIA Broadcast funcionando sem interrupção.
   * Quer conferir o enquadramento? Um clique em **`👁️ Mostrar`** e a janela reaparece na sua tela na hora!
 
-### ⚡ 3. Perfis Rápidos de Desempenho
+### ⌨️ 3. Ocultação Inteligente do Teclado Virtual (Modo Físico UHID)
+* **O Problema Tradicional:** Ao clicar em campos de texto no celular pelo PC, o Android abre o teclado virtual (Gboard, SwiftKey), cobrindo metade da tela e encurtando o espaço de visualização.
+* **A Solução Aura:** A ferramenta **`⌨️ Ocultar Teclado Virtual (UHID)`** simula um teclado físico de hardware no kernel Linux (`--keyboard=uhid`) e desativa a exibição do teclado na tela via ADB (`show_ime_with_hard_keyboard 0`):
+  * **100% de Visão Preservada:** Os campos de texto recebem a digitação diretamente do seu teclado físico do computador sem que nenhuma barra virtual suba na tela.
+  * **Configuração Simplificada:** Use o atalho **`Alt + K`** a qualquer momento para ajustar o layout do teclado físico diretamente no Android (ex: ABNT2 ou US Internacional).
+  * **Restauração Automática:** Ao encerrar o espelhamento, as configurações originais do teclado são restauradas no dispositivo.
+
+### ⚡ 4. Perfis Rápidos de Desempenho
 Alterne instantaneamente entre configurações pré-calibradas:
 
 | Perfil | FPS | Bitrate | Resolução | Buffer | Áudio | Foco |
@@ -54,7 +61,7 @@ Alterne instantaneamente entre configurações pré-calibradas:
 | **🔋 Wi-Fi Econômico** | 60 | 6M | 720p | 80 ms | Mudo | Conexões instáveis e economia de largura de banda |
 | **🎥 Webcam Pro** | 60 | 24M | 1080p | 80 ms | Mudo | Otimizado para OBS, Zoom e NVIDIA Broadcast |
 
-### 📶 4. Conectividade Inteligente & Detecção Wi-Fi
+### 📶 5. Conectividade Inteligente & Detecção Wi-Fi
 * **Varredura mDNS Automática:** Detecta as portas dinâmicas sorteadas pela Depuração por Wi-Fi do **Android 11, 12, 13, 14, 15 e 16** e conecta com 1 clique no botão `🔍 Auto-Detectar`.
 * **Fixação de Porta 5555:** Abra a porta clássica 5555 direto pela conexão de rede ou pelo cabo.
 * **Teste de Latência (Ping):** Medidor ICMP integrado com diagnóstico visual por cores (Verde: < 20ms, Amarelo: 20-45ms, Vermelho: > 45ms).
@@ -103,6 +110,7 @@ Durante a transmissão, você pode usar os seguintes atalhos rápidos:
 | :--- | :--- |
 | **`Alt + P`** | Liga / Desliga a tela do smartphone |
 | **`Alt + O`** | Apaga a tela física mantendo a transmissão ativa no PC |
+| **`Alt + K`** | Abre configurações de layout do teclado físico no Android |
 | **`Alt + F`** ou **`F11`** | Alterna entre Modo Janela e Tela Cheia |
 | **`Alt + R`** | Rotaciona a tela do espelhamento |
 | **`Alt + ←` / `Alt + →`** | Gira a imagem em 90° em tempo real (ideal para ajustar câmeras) |
