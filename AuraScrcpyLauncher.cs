@@ -143,6 +143,7 @@ namespace AuraScrcpy
         private static ComboBox cmbBuffer;
         private static ComboBox cmbCameraFacing;
         private static ComboBox cmbCameraOrientation;
+        private static ComboBox cmbHwDec;
 
         // UI Controls - Actions & Status
         private static Button btnLaunch;
@@ -366,7 +367,7 @@ namespace AuraScrcpy
                                 <TextBlock Text='AURA' FontWeight='Bold' FontSize='15' Foreground='#10B981'/>
                                 <TextBlock Text=' SCRCPY' FontWeight='Bold' FontSize='15' Foreground='#38BDF8'/>
                                 <Border Background='#1E293B' CornerRadius='4' Margin='8,0,0,0' Padding='6,1'>
-                                    <TextBlock Text='v4.1 PRO' FontSize='10' FontWeight='Bold' Foreground='#94A3B8'/>
+                                    <TextBlock Text='v5.0.1 PRO' FontSize='10' FontWeight='Bold' Foreground='#94A3B8'/>
                                 </Border>
                             </StackPanel>
                             <TextBlock Text='Painel Otimizado de Espelhamento e Produtividade' FontSize='11' Foreground='#64748B'/>
@@ -513,7 +514,7 @@ namespace AuraScrcpy
                     <!-- Section: Ferramentas & Toggles Rápidos -->
                     <Border Background='#131C2E' CornerRadius='10' BorderBrush='#1E293B' BorderThickness='1' Padding='14' Margin='0,0,0,9'>
                         <StackPanel>
-                            <TextBlock Text='RECURSOS E FERRAMENTAS DO SCRCPY 4.1' FontSize='12' FontWeight='Bold' Foreground='#38BDF8' Margin='0,0,0,8'/>
+                            <TextBlock Text='RECURSOS E FERRAMENTAS DO SCRCPY 5.0' FontSize='12' FontWeight='Bold' Foreground='#38BDF8' Margin='0,0,0,8'/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width='*'/>
@@ -627,17 +628,27 @@ namespace AuraScrcpy
                                 </StackPanel>
 
                                 <!-- Orientação da Câmera -->
-                                <StackPanel Grid.Row='3' Grid.Column='0' Grid.ColumnSpan='2' Margin='6'>
-                                    <TextBlock Text='Orientação da Câmera (Para Tripé/Mesa):' FontSize='12' FontWeight='SemiBold' Foreground='#F8FAFC' Margin='0,0,0,5'/>
+                                <StackPanel Grid.Row='3' Grid.Column='0' Margin='6'>
+                                    <TextBlock Text='Orientação Câmera (Tripé/Mesa):' FontSize='12' FontWeight='SemiBold' Foreground='#F8FAFC' Margin='0,0,0,5'/>
                                     <ComboBox Name='CmbCameraOrientation'>
                                         <ComboBoxItem Content='0° Padrão (Paisagem)'/>
-                                        <ComboBoxItem Content='90° Vertical em Pé (Para Shorts/Reunião)' IsSelected='True'/>
+                                        <ComboBoxItem Content='90° Vertical em Pé (Shorts/Reunião)' IsSelected='True'/>
                                         <ComboBoxItem Content='180° Invertido (Ponta-cabeça)'/>
                                         <ComboBoxItem Content='270° Deitado Invertido'/>
                                         <ComboBoxItem Content='Espelhado 0° (Paisagem)'/>
                                         <ComboBoxItem Content='Espelhado 90° (Vertical em Pé)'/>
                                         <ComboBoxItem Content='Espelhado 180°'/>
                                         <ComboBoxItem Content='Espelhado 270°'/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- Decodificação por Hardware GPU (SCRCPY v5) -->
+                                <StackPanel Grid.Row='3' Grid.Column='1' Margin='6'>
+                                    <TextBlock Text='Decodificação Hardware (GPU):' FontSize='12' FontWeight='SemiBold' Foreground='#F8FAFC' Margin='0,0,0,5'/>
+                                    <ComboBox Name='CmbHwDec'>
+                                        <ComboBoxItem Content='auto (GPU D3D11VA - Recomendado)' IsSelected='True'/>
+                                        <ComboBoxItem Content='d3d11va (Forçar GPU DirectX 11)'/>
+                                        <ComboBoxItem Content='disabled (Software CPU - Fallback)'/>
                                     </ComboBox>
                                 </StackPanel>
 
@@ -744,7 +755,7 @@ namespace AuraScrcpy
             <Border Grid.Row='2' Background='#0F172A' CornerRadius='0,0,14,14' BorderBrush='#1E293B' BorderThickness='0,1,0,0'>
                 <Grid Margin='14,0,14,0'>
                     <TextBlock Name='TxtStatus' Text='Pronto para iniciar espelhamento.' FontSize='11' Foreground='#94A3B8' VerticalAlignment='Center' TextTrimming='CharacterEllipsis'/>
-                    <TextBlock Text='SCRCPY 4.1 • SDL3 • H.265 / AV1' FontSize='10' Foreground='#475569' HorizontalAlignment='Right' VerticalAlignment='Center'/>
+                    <TextBlock Text='SCRCPY 5.0.1 • GPU D3D11VA • SDL 3.4 • H.265 / AV1' FontSize='10' Foreground='#475569' HorizontalAlignment='Right' VerticalAlignment='Center'/>
                 </Grid>
             </Border>
         </Grid>
@@ -828,6 +839,7 @@ namespace AuraScrcpy
             cmbBuffer = (ComboBox)mainWindow.FindName("CmbBuffer");
             cmbCameraFacing = (ComboBox)mainWindow.FindName("CmbCameraFacing");
             cmbCameraOrientation = (ComboBox)mainWindow.FindName("CmbCameraOrientation");
+            cmbHwDec = (ComboBox)mainWindow.FindName("CmbHwDec");
 
             btnLaunch = (Button)mainWindow.FindName("BtnLaunch");
             btnQuickUsb = (Button)mainWindow.FindName("BtnQuickUsb");
@@ -919,6 +931,7 @@ namespace AuraScrcpy
             cmbBuffer.SelectionChanged += comboHandler;
             cmbCameraFacing.SelectionChanged += comboHandler;
             cmbCameraOrientation.SelectionChanged += comboHandler;
+            cmbHwDec.SelectionChanged += comboHandler;
 
             // Launchers & Actions
             btnLaunch.Click += delegate { LaunchScrcpy(); };
@@ -989,6 +1002,7 @@ namespace AuraScrcpy
             currentPresetName = preset;
             ResetPresetButtons();
             if (chkSyncPrint != null) chkSyncPrint.IsChecked = true;
+            if (cmbHwDec != null) cmbHwDec.SelectedIndex = 0; // auto (GPU D3D11VA)
 
             switch (preset)
             {
@@ -1248,6 +1262,18 @@ namespace AuraScrcpy
             else if (cmbBuffer.SelectedIndex == 2) sb.Append("--video-buffer=50 ");
             else if (cmbBuffer.SelectedIndex == 3) sb.Append("--video-buffer=80 ");
             else if (cmbBuffer.SelectedIndex == 4) sb.Append("--video-buffer=120 ");
+
+            // Hardware Video Decoding (GPU D3D11VA)
+            if (cmbHwDec != null)
+            {
+                if (cmbHwDec.SelectedIndex == 1) sb.Append("--hwdec=d3d11va ");
+                else if (cmbHwDec.SelectedIndex == 2) sb.Append("--hwdec=disabled ");
+                else sb.Append("--hwdec=auto ");
+            }
+            else
+            {
+                sb.Append("--hwdec=auto ");
+            }
 
             sb.Append("--shortcut-mod=lalt,lctrl ");
             string title = isUsb ? "Aura - USB (Zero Delay)" : "Aura - Wi-Fi (Fluido)";
@@ -2571,6 +2597,8 @@ namespace AuraScrcpy
                                     tip = "O codec de vídeo escolhido não é suportado pelo seu aparelho. Mude o Codec para H.264 nos Ajustes Finos.";
                                 else if (errOutput.IndexOf("audio", StringComparison.OrdinalIgnoreCase) >= 0)
                                     tip = "Falha no áudio. Desmarque 'Transmitir Áudio' (requer Android 11 ou superior).";
+                                else if (errOutput.IndexOf("hwdec", StringComparison.OrdinalIgnoreCase) >= 0 || errOutput.IndexOf("d3d11va", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    tip = "Falha no decodificador por hardware da GPU. Mude 'Decodificação Hardware' para 'disabled (Software)' nos Ajustes Finos.";
 
                                 MessageBox.Show("O SCRCPY encerrou prematuramente:\n\n" + (string.IsNullOrEmpty(errOutput) ? "Código de saída: " + exitCode : errOutput.Trim()) + "\n\n💡 Sugestão: " + tip, "Alerta do SCRCPY", MessageBoxButton.OK, MessageBoxImage.Warning);
                             });
@@ -2878,6 +2906,7 @@ namespace AuraScrcpy
                             if (k == "Buffer" && int.TryParse(v, out idx)) cmbBuffer.SelectedIndex = idx;
                             if (k == "CameraFacing" && int.TryParse(v, out idx)) cmbCameraFacing.SelectedIndex = idx;
                             if (k == "CameraOrientation" && int.TryParse(v, out idx)) cmbCameraOrientation.SelectedIndex = idx;
+                            if (k == "HwDec" && int.TryParse(v, out idx) && cmbHwDec != null) cmbHwDec.SelectedIndex = idx;
 
                             if (k == "ScreenOff") chkScreenOff.IsChecked = (v == "1");
                             if (k == "StayAwake") chkStayAwake.IsChecked = (v == "1");
@@ -2936,6 +2965,7 @@ namespace AuraScrcpy
                 sb.AppendLine("Buffer=" + cmbBuffer.SelectedIndex);
                 sb.AppendLine("CameraFacing=" + cmbCameraFacing.SelectedIndex);
                 sb.AppendLine("CameraOrientation=" + cmbCameraOrientation.SelectedIndex);
+                if (cmbHwDec != null) sb.AppendLine("HwDec=" + cmbHwDec.SelectedIndex);
                 sb.AppendLine("ScreenOff=" + (chkScreenOff.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("StayAwake=" + (chkStayAwake.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("Audio=" + (chkAudio.IsChecked == true ? "1" : "0"));
