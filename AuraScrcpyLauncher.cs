@@ -40,6 +40,40 @@ namespace AuraScrcpy
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOZORDER = 0x0004;
 
+        // Keyboard Hook & Clipboard Bridge (Print to Phone)
+        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+        private static LowLevelKeyboardProc keyboardProc = HookCallback;
+        private static IntPtr hookId = IntPtr.Zero;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        private const int WH_KEYBOARD_LL = 13;
+        private const int WM_KEYDOWN = 0x0100;
+        private const int WM_SYSKEYDOWN = 0x0104;
+        private const int VK_V = 0x56;
+        private const int VK_CONTROL = 0x11;
+        private const int VK_MENU = 0x12;
+
         private static Process currentScrcpyProcess = null;
         private static bool isScrcpyHidden = false;
 
@@ -99,6 +133,7 @@ namespace AuraScrcpy
         private static CheckBox chkCloseOnLaunch;
         private static CheckBox chkInvisibleMode;
         private static CheckBox chkNoVirtualKeyboard;
+        private static CheckBox chkSyncPrint;
 
         // UI Controls - Advanced Tuning
         private static ComboBox cmbResolution;
@@ -498,6 +533,7 @@ namespace AuraScrcpy
                                     <CheckBox Name='ChkRecord' Content='🔴 Gravar sessão em MP4' IsChecked='False' ToolTip='Grava a transmissão diretamente em um arquivo MP4 com data e hora na pasta local.'/>
                                     <CheckBox Name='ChkCamera' Content='📷 Modo Câmera / Webcam' IsChecked='False' ToolTip='Usa a câmera física do celular como webcam de estúdio de alta resolução (requer Android 12+).'/>
                                     <CheckBox Name='ChkOtg' Content='🖱️ Modo OTG (Teclado/Mouse)' IsChecked='False' ToolTip='Controla o celular com mouse e teclado sem espelhar tela (apenas via USB).'/>
+                                    <CheckBox Name='ChkSyncPrint' Content='📸 Enviar Print (Ctrl+Alt+V / Alt+V)' IsChecked='True' ToolTip='Captura qualquer print ou imagem da Área de Transferência do PC (Win+Shift+S) e envia para a galeria de Capturas do celular ao pressionar o atalho no espelhamento, pronto para colar no WhatsApp.'/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -627,7 +663,8 @@ namespace AuraScrcpy
                                 <TextBlock Text='• Alt + H : Botão Home (Início)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + B / Botão Dir : Botão Voltar' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + S : Alternar Apps (Multitarefa)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
-                                <TextBlock Text='• Alt + C / V : Copiar / Colar no Android' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
+                                <TextBlock Text='• Alt + C / V : Copiar / Colar texto' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
+                                <TextBlock Text='• Ctrl + Alt + V : Enviar Print para WhatsApp' FontSize='11' Foreground='#38BDF8' FontWeight='SemiBold' Margin='0,2'/>
                                 <TextBlock Text='• Alt + R : Rotacionar tela (Tempo real)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + ←/→ : Girar a imagem 90° em tempo real (câmera vertical)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
                                 <TextBlock Text='• Alt + Shift + ←/→ : Espelhar imagem (horizontal/vertical)' FontSize='11' Foreground='#CBD5E1' Margin='0,2'/>
@@ -782,6 +819,7 @@ namespace AuraScrcpy
             chkCloseOnLaunch = (CheckBox)mainWindow.FindName("ChkCloseOnLaunch");
             chkInvisibleMode = (CheckBox)mainWindow.FindName("ChkInvisibleMode");
             chkNoVirtualKeyboard = (CheckBox)mainWindow.FindName("ChkNoVirtualKeyboard");
+            chkSyncPrint = (CheckBox)mainWindow.FindName("ChkSyncPrint");
 
             cmbResolution = (ComboBox)mainWindow.FindName("CmbResolution");
             cmbFps = (ComboBox)mainWindow.FindName("CmbFps");
@@ -863,6 +901,7 @@ namespace AuraScrcpy
             chkOtg.Click += tweakHandler;
             chkInvisibleMode.Click += tweakHandler;
             chkNoVirtualKeyboard.Click += tweakHandler;
+            chkSyncPrint.Click += tweakHandler;
             chkCloseOnLaunch.Click += delegate { SaveSettings(); };
 
             SelectionChangedEventHandler comboHandler = delegate {
@@ -893,6 +932,7 @@ namespace AuraScrcpy
             btnAudioCompanion.Click += delegate { ToggleAudioCompanion(); };
 
             mainWindow.Closed += delegate {
+                UninstallKeyboardHook();
                 SaveSettings();
                 if (autoDetectTimer != null) autoDetectTimer.Stop();
                 try {
@@ -948,6 +988,7 @@ namespace AuraScrcpy
             isApplyingPreset = true;
             currentPresetName = preset;
             ResetPresetButtons();
+            if (chkSyncPrint != null) chkSyncPrint.IsChecked = true;
 
             switch (preset)
             {
@@ -2477,9 +2518,11 @@ namespace AuraScrcpy
 
                         Process proc = Process.Start(psi);
                         currentScrcpyProcess = proc;
+                        SafeInvoke(delegate { InstallKeyboardHook(); });
 
                         proc.EnableRaisingEvents = true;
                         proc.Exited += delegate {
+                            SafeInvoke(delegate { UninstallKeyboardHook(); });
                             if (hideVirtualKeyboard && !string.IsNullOrEmpty(selector))
                             {
                                 try { RunCommand(adbPath, selector + " shell settings put secure show_ime_with_hard_keyboard 1", 2000); } catch { }
@@ -2571,6 +2614,7 @@ namespace AuraScrcpy
         {
             try
             {
+                UninstallKeyboardHook();
                 Process[] procs = Process.GetProcessesByName("scrcpy");
                 int count = procs.Length;
                 foreach (Process p in procs)
@@ -2848,6 +2892,7 @@ namespace AuraScrcpy
                             if (k == "CloseOnLaunch") chkCloseOnLaunch.IsChecked = (v == "1");
                             if (k == "InvisibleMode") chkInvisibleMode.IsChecked = (v == "1");
                             if (k == "NoVirtualKeyboard") chkNoVirtualKeyboard.IsChecked = (v == "1");
+                            if (k == "SyncPrint") chkSyncPrint.IsChecked = (v == "1");
                         }
                     }
 
@@ -2904,6 +2949,7 @@ namespace AuraScrcpy
                 sb.AppendLine("CloseOnLaunch=" + (chkCloseOnLaunch.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("InvisibleMode=" + (chkInvisibleMode.IsChecked == true ? "1" : "0"));
                 sb.AppendLine("NoVirtualKeyboard=" + (chkNoVirtualKeyboard.IsChecked == true ? "1" : "0"));
+                sb.AppendLine("SyncPrint=" + (chkSyncPrint.IsChecked == true ? "1" : "0"));
 
                 File.WriteAllText(configFile, sb.ToString());
             }
@@ -2975,5 +3021,194 @@ namespace AuraScrcpy
                 return "ERROR: " + ex.Message;
             }
         }
+
+        #region Clipboard Print Sync & Global Hotkey
+        private static void InstallKeyboardHook()
+        {
+            if (hookId != IntPtr.Zero) return;
+            try
+            {
+                using (Process curProcess = Process.GetCurrentProcess())
+                using (ProcessModule curModule = curProcess.MainModule)
+                {
+                    hookId = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardProc, GetModuleHandle(curModule.ModuleName), 0);
+                }
+            }
+            catch { }
+        }
+
+        private static void UninstallKeyboardHook()
+        {
+            if (hookId != IntPtr.Zero)
+            {
+                try { UnhookWindowsHookEx(hookId); } catch { }
+                hookId = IntPtr.Zero;
+            }
+        }
+
+        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
+            {
+                int vkCode = Marshal.ReadInt32(lParam);
+                if (vkCode == VK_V)
+                {
+                    bool isCtrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+                    bool isAlt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+
+                    // Dedicated Print Shortcut: Ctrl + Alt + V (or Alt + V if clipboard contains image)
+                    if ((isCtrl && isAlt) || (isAlt && !isCtrl))
+                    {
+                        bool syncPrintEnabled = false;
+                        SafeInvoke(delegate {
+                            if (chkSyncPrint != null) syncPrintEnabled = chkSyncPrint.IsChecked == true;
+                        });
+
+                        if (syncPrintEnabled)
+                        {
+                            IntPtr fg = GetForegroundWindow();
+                            uint fgPid = 0;
+                            GetWindowThreadProcessId(fg, out fgPid);
+
+                            bool isTarget = false;
+                            if (currentScrcpyProcess != null && !currentScrcpyProcess.HasExited)
+                            {
+                                if (fgPid == (uint)currentScrcpyProcess.Id) isTarget = true;
+                            }
+                            if (!isTarget)
+                            {
+                                try
+                                {
+                                    using (Process cur = Process.GetCurrentProcess())
+                                    {
+                                        if (fgPid == (uint)cur.Id) isTarget = true;
+                                    }
+                                }
+                                catch { }
+                            }
+
+                            if (isTarget)
+                            {
+                                bool hasImage = false;
+                                SafeInvoke(delegate {
+                                    try
+                                    {
+                                        hasImage = Clipboard.ContainsImage() || Clipboard.ContainsFileDropList();
+                                    }
+                                    catch { }
+                                });
+
+                                if (hasImage)
+                                {
+                                    SendClipboardImageToDeviceAsync();
+                                    return (IntPtr)1; // Consume key event
+                                }
+                                else if (isCtrl && isAlt)
+                                {
+                                    // User explicitly pressed Ctrl+Alt+V but clipboard has no image
+                                    SafeInvoke(delegate {
+                                        txtStatus.Text = "ℹ️ Nenhum print encontrado na Área de Transferência. Pressione Win+Shift+S primeiro.";
+                                    });
+                                    return (IntPtr)1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return CallNextHookEx(hookId, nCode, wParam, lParam);
+        }
+
+        private static void SendClipboardImageToDeviceAsync()
+        {
+            SafeInvoke(delegate {
+                try
+                {
+                    byte[] imageBytes = null;
+                    if (Clipboard.ContainsImage())
+                    {
+                        BitmapSource src = Clipboard.GetImage();
+                        if (src != null)
+                        {
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(src));
+                                encoder.Save(ms);
+                                imageBytes = ms.ToArray();
+                            }
+                        }
+                    }
+                    else if (Clipboard.ContainsFileDropList())
+                    {
+                        var files = Clipboard.GetFileDropList();
+                        if (files != null && files.Count > 0)
+                        {
+                            string f = files[0];
+                            string ext = Path.GetExtension(f).ToLowerInvariant();
+                            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp")
+                            {
+                                imageBytes = File.ReadAllBytes(f);
+                            }
+                        }
+                    }
+
+                    if (imageBytes == null || imageBytes.Length == 0)
+                    {
+                        txtStatus.Text = "ℹ️ Nenhum print encontrado na Área de Transferência. Pressione Win+Shift+S primeiro.";
+                        return;
+                    }
+
+                    try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
+                    txtStatus.Text = "📸 Enviando print do computador para o celular...";
+
+                    string targetSelector = "";
+                    bool isUsb = rbUsb.IsChecked == true;
+                    string targetIp = txtIp.Text.Trim();
+                    if (isUsb)
+                    {
+                        targetSelector = !string.IsNullOrEmpty(lastDetectedUsbDevice) ? "-s " + lastDetectedUsbDevice : "-d";
+                    }
+                    else
+                    {
+                        targetSelector = !string.IsNullOrEmpty(targetIp) ? "-s " + targetIp : "";
+                    }
+
+                    ThreadPool.QueueUserWorkItem(delegate {
+                        try
+                        {
+                            string tempDir = Path.Combine(Path.GetTempPath(), "AuraScrcpy");
+                            if (!Directory.Exists(tempDir)) Directory.CreateDirectory(tempDir);
+                            string tempFile = Path.Combine(tempDir, "aura_clip_" + Guid.NewGuid().ToString("N").Substring(0, 8) + ".png");
+                            File.WriteAllBytes(tempFile, imageBytes);
+
+                            string remoteName = "Screenshot_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".png";
+                            string remotePath = "/sdcard/Pictures/Screenshots/" + remoteName;
+
+                            RunCommand(adbPath, targetSelector + " shell mkdir -p /sdcard/Pictures/Screenshots", 2000);
+                            RunCommand(adbPath, targetSelector + " push \"" + tempFile + "\" \"" + remotePath + "\"", 6000);
+                            RunCommand(adbPath, targetSelector + " shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE --receiver-include-background -d \"file://" + remotePath + "\"", 2500);
+
+                            try { File.Delete(tempFile); } catch { }
+
+                            SafeInvoke(delegate {
+                                txtStatus.Text = "🟢 📸 Print enviado para o celular (" + remoteName + ")! Abra o WhatsApp para anexar.";
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            SafeInvoke(delegate {
+                                txtStatus.Text = "⚠️ Falha ao transferir print: " + ex.Message;
+                            });
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    txtStatus.Text = "⚠️ Erro ao capturar imagem da Área de Transferência: " + ex.Message;
+                }
+            });
+        }
+        #endregion
     }
 }

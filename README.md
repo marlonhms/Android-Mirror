@@ -1,4 +1,4 @@
-# 📱 Android-Mirror (Aura SCRCPY v4.1 PRO)
+﻿# 📱 Android-Mirror (Aura SCRCPY v4.1 PRO)
 
 <p align="center">
   <img src="scrcpy.png" alt="Aura SCRCPY Logo" width="120" />
@@ -56,7 +56,13 @@ Projetado especialmente para **criadores de conteúdo, streamers e profissionais
   * **Som de Baixa Latência:** O áudio do Android passa a tocar instantaneamente no PC em alta fidelidade.
   * **Controle Dinâmico:** Um clique no botão alterna entre iniciar e encerrar a recepção de áudio a qualquer momento.
 
-### ⚡ 5. Perfis Rápidos de Desempenho
+### 📸 5. Sincronização Inteligente de Prints / Imagens (`Ctrl + Alt + V` / `Alt + V`)
+* **O Problema Tradicional:** O SCRCPY oficial sincroniza apenas textos no clipboard. Ao tirar um print no computador (`Win + Shift + S`) ou copiar uma imagem, dar `Ctrl + V` no WhatsApp ou outros apps no celular não enviava nada.
+* **A Solução Aura:** O sincronizador em segundo plano captura qualquer bitmap ou arquivo de imagem copiado na Área de Transferência do Windows:
+  * Ao pressionar o atalho exclusivo **`Ctrl + Alt + V`** (ou **`Alt + V`** se houver imagem copiada) com a janela do SCRCPY focada, o print é transferido imediatamente via ADB para a pasta de capturas do celular (`/sdcard/Pictures/Screenshots/`).
+  * Um broadcast instantâneo notifica o **MediaStore** do Android. No WhatsApp, basta tocar no ícone da câmera ou do clipe e a imagem estará no topo da lista pronta para envio!
+
+### ⚡ 6. Perfis Rápidos de Desempenho
 Alterne instantaneamente entre configurações pré-calibradas:
 
 | Perfil | FPS | Bitrate | Resolução | Buffer | Áudio | Foco |
@@ -68,7 +74,7 @@ Alterne instantaneamente entre configurações pré-calibradas:
 | **🔋 Wi-Fi Econômico** | 60 | 6M | 720p | 80 ms | Mudo | Conexões instáveis e economia de largura de banda |
 | **🎥 Webcam Pro** | 60 | 24M | 1080p | 80 ms | Mudo | Otimizado para OBS, Zoom e NVIDIA Broadcast |
 
-### 📶 6. Conectividade Inteligente & Detecção Wi-Fi
+### 📶 7. Conectividade Inteligente & Detecção Wi-Fi
 * **Varredura mDNS Automática:** Detecta as portas dinâmicas sorteadas pela Depuração por Wi-Fi do **Android 11, 12, 13, 14, 15 e 16** e conecta com 1 clique no botão `🔍 Auto-Detectar`.
 * **Fixação de Porta 5555:** Abra a porta clássica 5555 direto pela conexão de rede ou pelo cabo.
 * **Teste de Latência (Ping):** Medidor ICMP integrado com diagnóstico visual por cores (Verde: < 20ms, Amarelo: 20-45ms, Vermelho: > 45ms).

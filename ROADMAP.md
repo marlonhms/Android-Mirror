@@ -1,4 +1,4 @@
-# 🚀 ROADMAP & GUIA DE MODERNIZAÇÃO: AURA SCRCPY v4.1 PRO
+﻿# 🚀 ROADMAP & GUIA DE MODERNIZAÇÃO: AURA SCRCPY v4.1 PRO
 
 Este documento estabelece o diagnóstico técnico, a arquitetura visual, o plano de otimização inteligente e as fases de evolução do inicializador do **SCRCPY v4.1**, substituindo a antiga interface básica em VBScript por uma aplicação desktop de alta performance, tecnológica e acessível sem tocar em código.
 
@@ -110,6 +110,10 @@ Todas as principais ferramentas do SCRCPY 4.1 estão expostas por toggles e sele
 - **O que faz:** Inicia uma instância secundária invisível dedicada ao áudio, transmitindo o som do celular com baixa latência pelo codec Opus.
 - **Benefício:** Permite ligar ou desligar o áudio do celular no PC a qualquer momento com 1 clique, sem precisar interromper o espelhamento de vídeo já aberto.
 
+### 12. 📸 Sincronização Inteligente de Prints (`Ctrl + Alt + V` / `Alt + V`)
+- **O que faz:** Monitora a Área de Transferência do Windows em segundo plano e, ao pressionar o atalho no espelhamento, transfere instantaneamente qualquer print (`Win + Shift + S`) para `/sdcard/Pictures/Screenshots/` com indexação em tempo real via MediaStore.
+- **Benefício:** Permite colar prints do computador diretamente para o chat do WhatsApp ou qualquer outro aplicativo no Android, contornando a limitação nativa do SCRCPY que só suporta texto puro.
+
 ---
 
 ## 5. Guia Integrado de Atalhos do SCRCPY
@@ -125,7 +129,8 @@ A interface inclui um guia expansível com os atalhos de teclado mais úteis do 
 | **`Alt + H`** | Pressiona o botão Home (Início) |
 | **`Alt + B` ou Botão Direito** | Pressiona o botão Voltar (Back) |
 | **`Alt + S`** | Abre o menu de Aplicativos Recentes (Multitarefa) |
-| **`Alt + C` / `Alt + V`** | Sincroniza a Área de Transferência (Copiar e Colar) |
+| **`Alt + C` / `Alt + V`** | Sincroniza a Área de Transferência de texto |
+| **`Ctrl + Alt + V`** | Envia Print do PC direto para a galeria do celular (WhatsApp) |
 | **`Alt + I`** | Ativa / Desativa o contador de FPS em tempo real nos logs |
 | **Arrastar arquivo `.apk`** | Instala o aplicativo automaticamente no smartphone |
 | **Arrastar qualquer arquivo** | Envia o arquivo para a pasta `/sdcard/Download/` do aparelho |
@@ -198,6 +203,8 @@ A interface inclui um guia expansível com os atalhos de teclado mais úteis do 
 ---
 
 ### 🔵 FASE 3: Central Multimídia & Produtividade Avançada
+- [x] **Sincronização Inteligente de Prints e Imagens (`Ctrl + Alt + V` / `Alt + V`):**
+  - Captura prints da Área de Transferência do Windows (`Win + Shift + S`), transfere via ADB para a pasta de capturas do aparelho (`/sdcard/Pictures/Screenshots/`) e dispara indexação instantânea no MediaStore para envio direto no WhatsApp.
 - [ ] **Painel Interativo de Webcam:**
   - Botão na barra para acender e apagar a lanterna/flash do celular remotamente (`MOD+t`).
   - Controles de zoom óptico da câmera direto na tela do computador (`MOD+Up` / `MOD+Down`).
