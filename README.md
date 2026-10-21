@@ -17,6 +17,10 @@
   <img src="https://img.shields.io/badge/Licen%C3%A7a-Apache%202.0-F59E0B?style=for-the-badge" alt="Licença" />
 </p>
 
+<p align="center">
+  <img src="screenshot.png" alt="Aura SCRCPY v5.0.1 PRO Interface" width="620" />
+</p>
+
 ---
 
 ## ✨ Visão Geral
@@ -152,6 +156,7 @@ Durante a transmissão, você pode usar os seguintes atalhos rápidos:
 ├── AuraScrcpyLauncher.exe  # Executável standalone com ícone PE embutido
 ├── ROADMAP.md              # Documentação técnica e planejamento de evolução
 ├── README.md               # Apresentação do projeto e guia do usuário
+├── screenshot.png          # Captura visual da interface moderna (v5.0.1 PRO)
 ├── scrcpy.ico              # Ícone oficial multi-camadas (16x16 até 256x256)
 ├── scrcpy.png              # Logo gráfico oficial
 ├── adb.exe / scrcpy.exe    # Binários do ecossistema SCRCPY v5.0.1 (GPU D3D11VA)
