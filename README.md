@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/Core-SCRCPY%205.0.1-10B981?style=for-the-badge&logo=android" alt="SCRCPY" />
   <img src="https://img.shields.io/badge/GPU%20Decode-Direct3D%2011%20(D3D11VA)-0EA5E9?style=for-the-badge" alt="D3D11VA" />
   <img src="https://img.shields.io/badge/Licen%C3%A7a-Apache%202.0-F59E0B?style=for-the-badge" alt="Licença" />
+  <a href="https://github.com/marlonhms/Android-Mirror/releases/latest"><img src="https://img.shields.io/github/v/release/marlonhms/Android-Mirror?style=for-the-badge&color=10B981&label=Download%20v5.0.1" alt="Download Release" /></a>
 </p>
 
 <p align="center">
@@ -102,7 +103,7 @@ Alterne instantaneamente entre configurações pré-calibradas:
 2. Computador com Windows 10 ou 11.
 
 ### Início Rápido
-1. Baixe ou clone este repositório.
+1. Baixe o pacote pronto para uso **`Aura-SCRCPY-v5.0.1-PRO-win64.zip`** na aba de [Releases Oficiais](https://github.com/marlonhms/Android-Mirror/releases/latest) (ou clone este repositório).
 2. Execute o arquivo **`AuraScrcpyLauncher.exe`** (ou dê um duplo clique no atalho com ícone oficial).
 3. **Modo Cabo USB:**
    * Plugue o cabo USB.
