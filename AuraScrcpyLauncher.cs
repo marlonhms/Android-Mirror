@@ -514,7 +514,7 @@ namespace AuraScrcpy
                     <!-- Section: Ferramentas & Toggles Rápidos -->
                     <Border Background='#131C2E' CornerRadius='10' BorderBrush='#1E293B' BorderThickness='1' Padding='14' Margin='0,0,0,9'>
                         <StackPanel>
-                            <TextBlock Text='RECURSOS E FERRAMENTAS DO SCRCPY 5.0' FontSize='12' FontWeight='Bold' Foreground='#38BDF8' Margin='0,0,0,8'/>
+                            <TextBlock Text='RECURSOS E FERRAMENTAS DO SCRCPY 5.0.1' FontSize='12' FontWeight='Bold' Foreground='#38BDF8' Margin='0,0,0,8'/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width='*'/>
@@ -2597,7 +2597,7 @@ namespace AuraScrcpy
                                     tip = "O codec de vídeo escolhido não é suportado pelo seu aparelho. Mude o Codec para H.264 nos Ajustes Finos.";
                                 else if (errOutput.IndexOf("audio", StringComparison.OrdinalIgnoreCase) >= 0)
                                     tip = "Falha no áudio. Desmarque 'Transmitir Áudio' (requer Android 11 ou superior).";
-                                else if (errOutput.IndexOf("hwdec", StringComparison.OrdinalIgnoreCase) >= 0 || errOutput.IndexOf("d3d11va", StringComparison.OrdinalIgnoreCase) >= 0)
+                                else if (errOutput.IndexOf("hwdec", StringComparison.OrdinalIgnoreCase) >= 0 || errOutput.IndexOf("d3d11", StringComparison.OrdinalIgnoreCase) >= 0 || errOutput.IndexOf("direct3d", StringComparison.OrdinalIgnoreCase) >= 0 || errOutput.IndexOf("hardware decoding", StringComparison.OrdinalIgnoreCase) >= 0)
                                     tip = "Falha no decodificador por hardware da GPU. Mude 'Decodificação Hardware' para 'disabled (Software)' nos Ajustes Finos.";
 
                                 MessageBox.Show("O SCRCPY encerrou prematuramente:\n\n" + (string.IsNullOrEmpty(errOutput) ? "Código de saída: " + exitCode : errOutput.Trim()) + "\n\n💡 Sugestão: " + tip, "Alerta do SCRCPY", MessageBoxButton.OK, MessageBoxImage.Warning);

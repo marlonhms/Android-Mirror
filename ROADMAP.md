@@ -13,11 +13,11 @@ Este documento estabelece o diagnóstico técnico, a arquitetura visual, o plano
 
 ## 1. Diagnóstico Comparativo: VBScript Legado vs. Aura Launcher PRO
 
-| Aspecto | Script Anterior (`Inicio Otimizado.vbs`) | Aura Launcher v4.1 PRO (`AuraScrcpyLauncher.exe`) |
+| Aspecto | Script Anterior (`Inicio Otimizado.vbs`) | Aura Launcher v5.0.1 PRO (`AuraScrcpyLauncher.exe`) |
 | :--- | :--- | :--- |
 | **Identidade Visual** | Ícone padrão do Windows Script Host (folha azul genérica). | Ícone oficial do SCRCPY embutido no `.exe` e nos atalhos `.lnk` (7 resoluções de 16x16 até 256x256). |
 | **Interface com Usuário** | `InputBox` retangular cinza, fonte bitmap simples, bloqueante e monótona. | Janela Fluent/Cyberpunk com tema Dark Navy (`#0B0F19`), tipografia Segoe UI, botões com gradientes e badges de status. |
-| **Acessibilidade a Ajustes** | O usuário precisava editar código VBS para alterar bitrate, resolução, FPS, buffer ou áudio. | 5 Presets de 1 clique, toggles visuais para ferramentas e painel expansível de "Ajustes Finos" com controles intuitivos. |
+| **Acessibilidade a Ajustes** | O usuário precisava editar código VBS para alterar bitrate, resolução, FPS, buffer ou áudio. | 6 Presets de 1 clique, toggles visuais para ferramentas e painel expansível de "Ajustes Finos" com controles intuitivos. |
 | **Detecção de Dispositivos** | Script congelava a tela enquanto aguardava `adb`. | Detecção USB em tempo real assíncrona (atualiza automaticamente a cada 3,5s ao plugar o cabo), exibindo o modelo real do aparelho. |
 | **Tratamento de Erros** | Janelas de erro genéricas ou falha silenciosa. | **Watchdog de Inicialização:** Monitora os primeiros 1500ms do SCRCPY. Se o processo falhar (codec incompatível, falta de autorização USB, áudio não suportado), exibe um alerta claro com sugestão de solução. |
 | **Controle de Processos** | Não oferecia botão na interface para parar a sessão. | Botão **"⏹️ Encerrar"** integrado na barra principal para finalizar processos do SCRCPY com 1 clique. |
@@ -70,9 +70,9 @@ O usuário não precisa memorizar comandos de terminal. A aplicação oferece 5 
 
 ---
 
-## 4. Recursos e Ferramentas do SCRCPY 4.1 Desbloqueados
+## 4. Recursos e Ferramentas do SCRCPY 5.0.1 Desbloqueados
 
-Todas as principais ferramentas do SCRCPY 4.1 estão expostas por toggles e seletores intuitivos:
+Todas as principais ferramentas do SCRCPY 5.0.1 estão expostas por toggles e seletores intuitivos:
 
 ### 1. 📱 Desligar Tela Física do Celular (`-S` / `--turn-screen-off`)
 - **O que faz:** Desliga o display AMOLED/LCD do celular assim que o espelhamento abre no monitor.
